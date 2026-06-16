@@ -27,13 +27,11 @@ function notifyStateListeners() {
  * Route synchronization URL depending on environment to prevent CORS issues on production
  */
 export function getSyncUrl(syncId) {
-  if (syncId && syncId.startsWith('gnr-')) {
-    // Legacy keys are always routed through the production Vercel proxy
-    return `https://tournament-manager-black.vercel.app/api/sync?id=${syncId}`;
-  }
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "") {
-    return `https://jsonblob.com/api/jsonBlob${syncId ? `/${syncId}` : ''}`;
+    // Localhost calls the production Vercel deployment's proxy endpoint
+    return `https://tournament-manager-black.vercel.app/api/sync${syncId ? `?id=${syncId}` : ''}`;
   }
+  // Production calls the relative proxy endpoint
   return `/api/sync${syncId ? `?id=${syncId}` : ''}`;
 }
 
@@ -196,17 +194,8 @@ export async function enableRemoteSync() {
     });
     if (!res.ok) throw new Error("Failed to create remote sync session");
     
-    let syncId;
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "") {
-      // Local: jsonblob.com returns Location header
-      const location = res.headers.get('Location');
-      if (!location) throw new Error("Location header missing");
-      syncId = location.split('/').pop();
-    } else {
-      // Production: proxy api/sync returns JSON { id: ... }
-      const data = await res.json();
-      syncId = data.id;
-    }
+    const data = await res.json();
+    const syncId = data.id;
     
     state.syncId = syncId;
     localStorage.setItem(SYNC_STORAGE_KEY, syncId);

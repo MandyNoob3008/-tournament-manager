@@ -1,4 +1,5 @@
 // api/sync.js
+import { list, put } from '@vercel/blob';
 
 export default async function handler(req, res) {
   const { id } = req.query;
@@ -14,24 +15,16 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST' && !id) {
-      // Create new jsonBlob
-      const response = await fetch('https://jsonblob.com/api/jsonBlob', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(req.body)
+      // Create new tournament session
+      const randomHex = () => Math.random().toString(16).substring(2, 10);
+      const newId = `tournament-${randomHex()}-${randomHex()}`;
+
+      await put(`tournaments/${newId}.json`, JSON.stringify(req.body), {
+        access: 'public',
+        addRandomSuffix: false
       });
-      if (!response.ok) {
-        throw new Error(`Failed to create blob: ${response.statusText}`);
-      }
-      const location = response.headers.get('Location');
-      if (!location) {
-        throw new Error("Missing Location header from jsonblob.com");
-      }
-      const blobId = location.split('/').pop();
-      return res.status(201).json({ id: blobId });
+
+      return res.status(201).json({ id: newId });
     }
 
     if (!id) {
@@ -39,52 +32,37 @@ export default async function handler(req, res) {
     }
 
     // REGISTRY FOR LEGACY KEYS
-    const REGISTRY_BLOB_ID = '019ed239-62d5-7bdb-a813-68924f83bb63';
-    const REGISTRY_URL = `https://jsonblob.com/api/jsonBlob/${REGISTRY_BLOB_ID}`;
-    let targetBlobId = id;
+    let targetId = id;
     const isLegacy = id.startsWith('gnr-');
 
     if (isLegacy) {
       try {
-        const registryRes = await fetch(REGISTRY_URL);
-        if (!registryRes.ok) {
-          throw new Error(`Failed to fetch registry: ${registryRes.statusText}`);
+        const { blobs } = await list({ prefix: 'registry.json' });
+        let registry = {};
+        if (blobs.length > 0) {
+          const registryRes = await fetch(blobs[0].url);
+          if (registryRes.ok) {
+            registry = await registryRes.json();
+          }
         }
-        const registry = await registryRes.json();
 
         if (registry[id]) {
-          targetBlobId = registry[id];
+          targetId = registry[id];
         } else {
           if (req.method === 'POST' || req.method === 'PUT') {
-            const createRes = await fetch('https://jsonblob.com/api/jsonBlob', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              body: JSON.stringify(req.body)
-            });
-            if (!createRes.ok) {
-              throw new Error(`Failed to create blob for legacy ID: ${createRes.statusText}`);
-            }
-            const location = createRes.headers.get('Location');
-            if (!location) {
-              throw new Error("Missing Location header from jsonblob.com");
-            }
-            targetBlobId = location.split('/').pop();
+            const randomHex = () => Math.random().toString(16).substring(2, 10);
+            const newId = `tournament-${randomHex()}-${randomHex()}`;
 
-            registry[id] = targetBlobId;
-            const updateRes = await fetch(REGISTRY_URL, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              body: JSON.stringify(registry)
+            await put(`tournaments/${newId}.json`, JSON.stringify(req.body), {
+              access: 'public',
+              addRandomSuffix: false
             });
-            if (!updateRes.ok) {
-              console.error("Failed to update registry mapping:", updateRes.statusText);
-            }
+
+            registry[id] = newId;
+            await put('registry.json', JSON.stringify(registry), {
+              access: 'public',
+              addRandomSuffix: false
+            });
 
             return res.status(200).json(req.body);
           } else if (req.method === 'GET') {
@@ -92,34 +70,25 @@ export default async function handler(req, res) {
           }
         }
       } catch (err) {
-        console.error("Registry/Legacy sync mapping failed:", err);
+        console.error("Vercel Blob registry mapping failed:", err);
         return res.status(500).json({ error: `Legacy mapping error: ${err.message}` });
       }
     }
 
-    const targetUrl = `https://jsonblob.com/api/jsonBlob/${targetBlobId}`;
-
     if (req.method === 'POST' || req.method === 'PUT') {
-      const response = await fetch(targetUrl, {
-        method: 'PUT', // jsonblob.com uses PUT for updates
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(req.body)
+      await put(`tournaments/${targetId}.json`, JSON.stringify(req.body), {
+        access: 'public',
+        addRandomSuffix: false
       });
-      if (!response.ok) {
-        throw new Error(`Failed to save state: ${response.statusText}`);
-      }
-      const data = await response.json();
-      return res.status(200).json(data);
+      return res.status(200).json(req.body);
     } else if (req.method === 'GET') {
-      const response = await fetch(targetUrl);
+      const { blobs } = await list({ prefix: `tournaments/${targetId}.json` });
+      if (blobs.length === 0) {
+        return res.status(404).json({ error: "Sync session not found" });
+      }
+      const response = await fetch(blobs[0].url);
       if (!response.ok) {
-        if (response.status === 404) {
-          return res.status(404).json({ error: "Sync session not found" });
-        }
-        throw new Error(`Failed to pull state: ${response.statusText}`);
+        throw new Error(`Failed to fetch state: ${response.statusText}`);
       }
       const data = await response.json();
       return res.status(200).json(data);
@@ -127,7 +96,7 @@ export default async function handler(req, res) {
       return res.status(405).send("Method Not Allowed");
     }
   } catch (err) {
-    console.error("Vercel Proxy Sync error:", err);
+    console.error("Vercel Blob Sync proxy error:", err);
     return res.status(500).json({ error: err.message });
   }
 }
