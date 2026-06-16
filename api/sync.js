@@ -1,5 +1,5 @@
 // api/sync.js
-import { list, put } from '@vercel/blob';
+import { list, put, get } from '@vercel/blob';
 
 export default async function handler(req, res) {
   const { id } = req.query;
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       const newId = `tournament-${randomHex()}-${randomHex()}`;
 
       await put(`tournaments/${newId}.json`, JSON.stringify(req.body), {
-        access: 'public',
+        access: 'private',
         addRandomSuffix: false
       });
 
@@ -40,10 +40,8 @@ export default async function handler(req, res) {
         const { blobs } = await list({ prefix: 'registry.json' });
         let registry = {};
         if (blobs.length > 0) {
-          const registryRes = await fetch(blobs[0].url);
-          if (registryRes.ok) {
-            registry = await registryRes.json();
-          }
+          const blobData = await get(blobs[0].url, { access: 'private' });
+          registry = await new Response(blobData.body).json();
         }
 
         if (registry[id]) {
@@ -54,13 +52,13 @@ export default async function handler(req, res) {
             const newId = `tournament-${randomHex()}-${randomHex()}`;
 
             await put(`tournaments/${newId}.json`, JSON.stringify(req.body), {
-              access: 'public',
+              access: 'private',
               addRandomSuffix: false
             });
 
             registry[id] = newId;
             await put('registry.json', JSON.stringify(registry), {
-              access: 'public',
+              access: 'private',
               addRandomSuffix: false
             });
 
@@ -77,7 +75,7 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST' || req.method === 'PUT') {
       await put(`tournaments/${targetId}.json`, JSON.stringify(req.body), {
-        access: 'public',
+        access: 'private',
         addRandomSuffix: false
       });
       return res.status(200).json(req.body);
@@ -86,11 +84,8 @@ export default async function handler(req, res) {
       if (blobs.length === 0) {
         return res.status(404).json({ error: "Sync session not found" });
       }
-      const response = await fetch(blobs[0].url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch state: ${response.statusText}`);
-      }
-      const data = await response.json();
+      const blobData = await get(blobs[0].url, { access: 'private' });
+      const data = await new Response(blobData.body).json();
       return res.status(200).json(data);
     } else {
       return res.status(405).send("Method Not Allowed");
