@@ -177,11 +177,16 @@
       </div>
     </div>
 
+    <!-- 5. COURTS VIEW -->
+    <div id="view-courts" class="view-panel">
+      <!-- Rendered via JS -->
+    </div>
+
   </main>
 
   <!-- Navigation Tab Bar -->
   <nav class="tab-bar">
-    <button class="tab-btn active" onclick="app.switchTab('dashboard')">
+    <button class="tab-btn active" data-tab="dashboard" onclick="app.switchTab('dashboard')">
       <svg viewBox="0 0 24 24">
         <rect x="3" y="3" width="7" height="9" rx="1"/>
         <rect x="14" y="3" width="7" height="5" rx="1"/>
@@ -190,7 +195,7 @@
       </svg>
       Dashboard
     </button>
-    <button class="tab-btn" onclick="app.switchTab('schedule')">
+    <button class="tab-btn" data-tab="schedule" onclick="app.switchTab('schedule')">
       <svg viewBox="0 0 24 24">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
         <line x1="16" y1="2" x2="16" y2="6"/>
@@ -199,7 +204,7 @@
       </svg>
       Schedule
     </button>
-    <button class="tab-btn" onclick="app.switchTab('standings')">
+    <button class="tab-btn" data-tab="standings" onclick="app.switchTab('standings')">
       <svg viewBox="0 0 24 24">
         <line x1="18" y1="20" x2="18" y2="10"/>
         <line x1="12" y1="20" x2="12" y2="4"/>
@@ -207,7 +212,15 @@
       </svg>
       Standings
     </button>
-    <button class="tab-btn" onclick="app.switchTab('admin')">
+    <button class="tab-btn" data-tab="courts" onclick="app.switchTab('courts')">
+      <svg viewBox="0 0 24 24">
+        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2.2" fill="none"/>
+        <line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" stroke-width="2.2"/>
+        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2.2"/>
+      </svg>
+      Courts
+    </button>
+    <button class="tab-btn" data-tab="admin" onclick="app.switchTab('admin')">
       <svg viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -236,6 +249,7 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

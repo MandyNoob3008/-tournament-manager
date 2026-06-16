@@ -800,3 +800,324 @@ main {
   margin-bottom: 12px;
   opacity: 0.5;
 }
+
+/* ==========================================================================
+   STYLING EXTENSIONS (COURTS, TIMER, BRACKET, SPECTATOR, SEARCH)
+   ========================================================================== */
+
+/* 1. Spectator Mode Banner & Layout Adjustment */
+.spectator-banner {
+  background: linear-gradient(135deg, #101c3f 0%, #153e7a 100%);
+  border-bottom: 2px solid var(--accent-secondary);
+  color: #fff;
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 1000;
+  position: sticky;
+  top: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+body.has-spectator-banner header {
+  top: 36px; /* Shift header down to accommodate spectator banner */
+}
+
+.live-blink {
+  color: var(--accent-danger);
+  animation: pulse 1s infinite alternate;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* 2. Search Inputs & Highlighting */
+.search-wrapper {
+  margin-bottom: 16px;
+}
+
+.search-clear-btn {
+  font-size: 1.2rem;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  padding: 0 8px;
+  transition: color 0.2s;
+}
+
+.search-clear-btn:hover {
+  color: var(--text-primary);
+}
+
+.search-highlight {
+  background: rgba(255, 215, 0, 0.3);
+  color: #fff;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* 3. Courts Dashboard View */
+.courts-grid-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+@media(min-width: 750px) {
+  .courts-grid-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.court-dashboard-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+}
+
+.court-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 10px;
+}
+
+.court-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, var(--text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.court-active-match {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-sm);
+  padding: 12px;
+}
+
+.court-empty-status {
+  text-align: center;
+  padding: 30px 10px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px dashed var(--glass-border);
+  border-radius: var(--border-radius-sm);
+}
+
+.court-queue-item {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 0.75rem;
+  border: 1px solid var(--glass-border);
+}
+
+.court-queue-item.playable {
+  background: rgba(88, 86, 214, 0.04);
+  border-color: rgba(88, 86, 214, 0.15);
+}
+
+.court-queue-item.locked {
+  background: rgba(255, 255, 255, 0.01);
+  opacity: 0.7;
+}
+
+.queue-time {
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  margin-bottom: 2px;
+}
+
+.queue-names {
+  color: var(--text-primary);
+}
+
+/* 4. Match Stopwatches */
+.match-stopwatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+.timer-digits {
+  font-weight: 700;
+  color: var(--accent-warning);
+}
+
+.timer-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 0 2px;
+  transition: transform 0.1s;
+}
+
+.timer-btn:active {
+  transform: scale(1.2);
+}
+
+.match-stopwatch.finished {
+  border-color: var(--accent-danger);
+  animation: flashRed 1s infinite alternate;
+}
+
+.match-stopwatch.finished .timer-digits {
+  color: var(--accent-danger);
+}
+
+@keyframes flashRed {
+  from { background-color: var(--bg-primary); box-shadow: none; }
+  to { background-color: rgba(255, 59, 48, 0.2); box-shadow: 0 0 8px rgba(255, 59, 48, 0.4); }
+}
+
+/* 5. SVG/CSS Tournament Bracket */
+.bracket-flow-wrapper {
+  display: flex;
+  overflow-x: auto;
+  padding: 20px 10px;
+  gap: 0px;
+  scrollbar-width: thin;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bracket-col {
+  display: flex;
+  flex-direction: column;
+  width: 170px;
+  flex-shrink: 0;
+}
+
+.bracket-col-header {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+}
+
+.bracket-node-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bracket-node {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 52px;
+  transition: all 0.3s ease;
+}
+
+.bracket-node.active {
+  background: rgba(88, 86, 214, 0.06);
+  border-color: rgba(88, 86, 214, 0.3);
+}
+
+.bracket-node.active.gold-glow {
+  background: rgba(255, 215, 0, 0.05);
+  border-color: rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.1);
+}
+
+.bracket-node.active.champion-glow {
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+  animation: championPulse 2s infinite alternate;
+}
+
+.node-label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.node-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bracket-connector-col {
+  width: 70px;
+  height: 310px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bracket-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.solid-line {
+  stroke-dasharray: 0 !important;
+  stroke: var(--accent-success) !important;
+}
+
+.bracket-line-vertical {
+  width: 1px;
+  background: var(--glass-border);
+  height: 20px;
+  align-self: center;
+  margin: 4px 0;
+}
+
+@keyframes championPulse {
+  from { box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+  to { box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); }
+}
+
+/* 6. Admin Panel Elements */
+.sync-active-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--accent-success);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+/* General Layout additions */
+.standings-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media(min-width: 750px) {
+  .standings-grid-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
