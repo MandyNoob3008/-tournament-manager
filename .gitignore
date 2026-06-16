@@ -1,0 +1,5 @@
+# gitignore
+node_modules/
+.vercel/
+package-lock.json
+*.log

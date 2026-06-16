@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Internal Lilly GNR PickleBall Tournament</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header Bar -->
+  <header>
+    <div class="header-title">
+      <span class="logo-icon">🎾</span>
+      <h1 style="font-size: 1.05rem;">Internal Lilly GNR PickleBall Tournament</h1>
+    </div>
+    <div id="live-indicator" class="badge badge-green">
+      <span style="display:inline-block; width:8px; height:8px; background:#34c759; border-radius:50%; animation: pulse 1.5s infinite;"></span>
+      LIVE
+    </div>
+  </header>
+
+  <!-- Main Views Container -->
+  <main>
+    
+    <!-- 1. DASHBOARD VIEW -->
+    <div id="view-dashboard" class="view-panel active">
+      <!-- Tournament Banner -->
+      <div style="margin-bottom: 16px;">
+        <img src="banner.png" alt="Internal Lilly GNR Pickleball Tournament" style="width: 100%; height: auto; border-radius: var(--border-radius-md); border: 1px solid var(--glass-border); box-shadow: 0 4px 20px rgba(0,0,0,0.3); display: block;">
+      </div>
+      <!-- Champion Highlight (Only if decided) -->
+      <div id="champion-banner" style="display: none;">
+        <div class="champion-card glass-panel">
+          <div class="champion-title">🏆 Tournament Champion 🏆</div>
+          <div id="champion-name" class="champion-team-name">Team Name</div>
+          <div id="champion-players" class="champion-players">Players Info</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Tournament Progress -->
+        <div class="card glass-panel">
+          <div class="card-title">Tournament Progress</div>
+          <div id="tournament-progress-val" class="stat-val">0%</div>
+          <div id="tournament-progress-desc" class="stat-desc">0 of 25 matches played</div>
+        </div>
+
+        <!-- Leaderboard Summary Widgets -->
+        <div class="card glass-panel dashboard-full-width">
+          <div class="card-title">Current Group Leaders</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 10px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--glass-border);">
+              <div style="font-size: 0.7rem; color: var(--text-muted);">GROUP A</div>
+              <div id="leader-a" style="font-size: 0.85rem; font-weight: 700; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">TBD</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--glass-border);">
+              <div style="font-size: 0.7rem; color: var(--text-muted);">GROUP B</div>
+              <div id="leader-b" style="font-size: 0.85rem; font-weight: 700; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">TBD</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--glass-border);">
+              <div style="font-size: 0.7rem; color: var(--text-muted);">GROUP C</div>
+              <div id="leader-c" style="font-size: 0.85rem; font-weight: 700; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">TBD</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--glass-border);">
+              <div style="font-size: 0.7rem; color: var(--text-muted);">GROUP D</div>
+              <div id="leader-d" style="font-size: 0.85rem; font-weight: 700; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">TBD</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--glass-border);">
+              <div style="font-size: 0.7rem; color: var(--text-muted);">GROUP E</div>
+              <div id="leader-e" style="font-size: 0.85rem; font-weight: 700; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">TBD</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--glass-border);">
+              <div style="font-size: 0.7rem; color: var(--text-muted);">GROUP F</div>
+              <div id="leader-f" style="font-size: 0.85rem; font-weight: 700; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">TBD</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Super 6 & Finals Qualifiers Summary -->
+        <div class="card glass-panel">
+          <div class="card-title">Super Group X (Winners A, C, E)</div>
+          <ul id="super-x-teams-list" style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem;">
+            <!-- Rendered via JS -->
+          </ul>
+        </div>
+        
+        <div class="card glass-panel">
+          <div class="card-title">Super Group Y (Winners B, D, F)</div>
+          <ul id="super-y-teams-list" style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem;">
+            <!-- Rendered via JS -->
+          </ul>
+        </div>
+
+        <!-- Finalists Widget -->
+        <div class="card glass-panel dashboard-full-width">
+          <div class="card-title">🏆 The Grand Finalists</div>
+          <div style="display: flex; justify-content: center; align-items: center; gap: 20px; padding: 10px 0;">
+            <div id="finalist-x-display" style="flex: 1; text-align: right; font-weight: 700; font-size: 1.1rem; color: var(--accent-gold);">Super X Leader (TBD)</div>
+            <div style="font-weight: 800; font-size: 1.2rem; color: var(--text-muted); background: var(--bg-tertiary); padding: 4px 10px; border-radius: 6px;">VS</div>
+            <div id="finalist-y-display" style="flex: 1; text-align: left; font-weight: 700; font-size: 1.1rem; color: var(--accent-gold);">Super Y Leader (TBD)</div>
+          </div>
+        </div>
+
+        <!-- Next / Current Matches -->
+        <div class="card glass-panel dashboard-full-width">
+          <div class="card-title">Ongoing / Upcoming Matches</div>
+          <div id="ongoing-matches-list" class="matches-grid">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. SCHEDULE & MATCHES VIEW -->
+    <div id="view-schedule" class="view-panel">
+      <!-- Stage Filter Selector -->
+      <div class="stage-selector">
+        <button class="filter-btn active" data-stage="all">All Stages</button>
+        <button class="filter-btn" data-stage="groups">Group Stage</button>
+        <button class="filter-btn" data-stage="super6">Super 6</button>
+        <button class="filter-btn" data-stage="finals">Finals</button>
+      </div>
+
+      <!-- Schedule Content -->
+      <div id="schedule-slots-container">
+        <!-- Rendered via JS, grouped by timeslots -->
+      </div>
+    </div>
+
+    <!-- 3. STANDINGS VIEW -->
+    <div id="view-standings" class="view-panel">
+      <div class="stage-selector">
+        <button class="filter-btn active" data-standings-group="all">All Groups</button>
+        <button class="filter-btn" data-standings-group="stages">Groups A-F</button>
+        <button class="filter-btn" data-standings-group="super6">Super 6 (X & Y)</button>
+      </div>
+
+      <div id="standings-content" class="group-standings-container">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- 4. ADMIN VIEW -->
+    <div id="view-admin" class="view-panel">
+      <!-- Reset Options Card -->
+      <div class="card glass-panel">
+        <div class="card-title">Tournament Reset Controls</div>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button class="btn btn-danger" onclick="app.promptReset('all')">Reset Entire Tournament</button>
+            <button class="btn btn-danger" onclick="app.promptReset('scores')">Reset All Scores</button>
+          </div>
+          <div style="border-top: 1px solid var(--glass-border); padding-top: 12px; margin-top: 6px;">
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">Reset Specific Stage / Group:</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button class="btn" onclick="app.promptReset('group-a')">Group A</button>
+              <button class="btn" onclick="app.promptReset('group-b')">Group B</button>
+              <button class="btn" onclick="app.promptReset('group-c')">Group C</button>
+              <button class="btn" onclick="app.promptReset('group-d')">Group D</button>
+              <button class="btn" onclick="app.promptReset('group-e')">Group E</button>
+              <button class="btn" onclick="app.promptReset('group-f')">Group F</button>
+              <button class="btn" onclick="app.promptReset('super-x')">Super X</button>
+              <button class="btn" onclick="app.promptReset('super-y')">Super Y</button>
+              <button class="btn" onclick="app.promptReset('finals')">Finals</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Teams Editor Accordion -->
+      <div class="card glass-panel">
+        <div class="card-title">Edit Team Details & Members</div>
+        <div id="admin-teams-accordion" style="margin-top: 10px;">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Navigation Tab Bar -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="app.switchTab('dashboard')">
+      <svg viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="9" rx="1"/>
+        <rect x="14" y="3" width="7" height="5" rx="1"/>
+        <rect x="14" y="12" width="7" height="9" rx="1"/>
+        <rect x="3" y="16" width="7" height="5" rx="1"/>
+      </svg>
+      Dashboard
+    </button>
+    <button class="tab-btn" onclick="app.switchTab('schedule')">
+      <svg viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Schedule
+    </button>
+    <button class="tab-btn" onclick="app.switchTab('standings')">
+      <svg viewBox="0 0 24 24">
+        <line x1="18" y1="20" x2="18" y2="10"/>
+        <line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+      Standings
+    </button>
+    <button class="tab-btn" onclick="app.switchTab('admin')">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      Admin
+    </button>
+  </nav>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Custom Confirmation Modal -->
+  <div id="confirm-modal" class="modal-overlay">
+    <div class="modal-card glass-panel">
+      <div class="modal-header">
+        <span style="font-size: 1.3rem;">⚠️</span>
+        <span id="modal-title-text">Confirm Action</span>
+      </div>
+      <div id="modal-body-text" class="modal-body">
+        Are you sure you want to perform this destructive action?
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel-btn">Cancel</button>
+        <button class="btn btn-danger" id="modal-confirm-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
