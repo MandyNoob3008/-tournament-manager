@@ -27,10 +27,14 @@ function notifyStateListeners() {
  * Route synchronization URL depending on environment to prevent CORS issues on production
  */
 export function getSyncUrl(syncId) {
-  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "") {
-    return `https://keyvalue.xyz/v1/${syncId}`;
+  if (syncId && syncId.startsWith('gnr-')) {
+    // Legacy keys are always routed through the production Vercel proxy
+    return `https://tournament-manager-black.vercel.app/api/sync?id=${syncId}`;
   }
-  return `/api/sync?id=${syncId}`;
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "") {
+    return `https://jsonblob.com/api/jsonBlob${syncId ? `/${syncId}` : ''}`;
+  }
+  return `/api/sync${syncId ? `?id=${syncId}` : ''}`;
 }
 
 /**
