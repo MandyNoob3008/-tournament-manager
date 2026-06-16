@@ -102,7 +102,7 @@ export async function saveState() {
 }
 
 /**
- * Push local state to keyvalue.xyz (via proxy if on vercel)
+ * Push local state to remote sync bin (via proxy if on vercel)
  */
 export async function pushToRemoteSync() {
   if (!state.syncId || state.isSpectator) return;
@@ -111,7 +111,7 @@ export async function pushToRemoteSync() {
 
   try {
     const res = await fetch(getSyncUrl(state.syncId), {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -130,7 +130,7 @@ export async function pushToRemoteSync() {
 }
 
 /**
- * Fetch latest state from keyvalue.xyz (Spectator or Pull)
+ * Fetch latest state from remote sync bin (Spectator or Pull)
  */
 export async function pullFromRemoteSync() {
   if (!state.syncId) return;
@@ -173,20 +173,48 @@ export function startSpectatorPolling() {
 }
 
 /**
- * Enable remote syncing for organizers
+ * Enable remote syncing for organizers (creates a new jsonblob bin)
  */
 export async function enableRemoteSync() {
-  // Generate random 16 character key
-  const randomHex = () => Math.random().toString(16).substring(2, 10);
-  const syncId = `gnr-pickleball-${randomHex()}-${randomHex()}`;
-  
-  state.syncId = syncId;
-  localStorage.setItem(SYNC_STORAGE_KEY, syncId);
-  
-  // Upload current state
-  await pushToRemoteSync();
+  state.isSyncing = true;
   notifyStateListeners();
-  return syncId;
+
+  try {
+    const res = await fetch(getSyncUrl(null), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        teams: state.teams,
+        matches: state.matches
+      })
+    });
+    if (!res.ok) throw new Error("Failed to create remote sync session");
+    
+    let syncId;
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "") {
+      // Local: jsonblob.com returns Location header
+      const location = res.headers.get('Location');
+      if (!location) throw new Error("Location header missing");
+      syncId = location.split('/').pop();
+    } else {
+      // Production: proxy api/sync returns JSON { id: ... }
+      const data = await res.json();
+      syncId = data.id;
+    }
+    
+    state.syncId = syncId;
+    localStorage.setItem(SYNC_STORAGE_KEY, syncId);
+    notifyStateListeners();
+    return syncId;
+  } catch (err) {
+    console.error("Failed to enable remote sync:", err);
+    return null;
+  } finally {
+    state.isSyncing = false;
+    notifyStateListeners();
+  }
 }
 
 /**
