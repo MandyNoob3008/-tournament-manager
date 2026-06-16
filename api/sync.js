@@ -40,8 +40,8 @@ export default async function handler(req, res) {
         const { blobs } = await list({ prefix: 'registry.json' });
         let registry = {};
         if (blobs.length > 0) {
-          const blobData = await get(blobs[0].url, { access: 'private' });
-          registry = await new Response(blobData.body).json();
+          const { stream } = await get(blobs[0].url, { access: 'private' });
+          registry = await new Response(stream).json();
         }
 
         if (registry[id]) {
@@ -84,8 +84,8 @@ export default async function handler(req, res) {
       if (blobs.length === 0) {
         return res.status(404).json({ error: "Sync session not found" });
       }
-      const blobData = await get(blobs[0].url, { access: 'private' });
-      const data = await new Response(blobData.body).json();
+      const { stream } = await get(blobs[0].url, { access: 'private' });
+      const data = await new Response(stream).json();
       return res.status(200).json(data);
     } else {
       return res.status(405).send("Method Not Allowed");
