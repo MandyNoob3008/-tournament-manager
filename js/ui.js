@@ -210,7 +210,7 @@ function renderDashboard(standingsCached, winnersCached) {
       ongoingContainer.innerHTML = `<div class="empty-state">No current or upcoming matches playable right now. Check schedule for details.</div>`;
     } else {
       ongoingContainer.innerHTML = activeMatches.map(m => renderMatchCardHTML(m)).join("");
-      attachCardListeners(activeMatches);
+      attachCardListeners(activeMatches, "#ongoing-matches-list");
     }
   }
 }
@@ -430,7 +430,7 @@ export function renderSchedule() {
   }
 
   container.innerHTML = html;
-  attachCardListeners(filteredMatches);
+  attachCardListeners(filteredMatches, "#schedule-slots-container");
 }
 
 /**
@@ -614,7 +614,7 @@ export function renderCourts() {
   
   // Attach timer & save action event listeners to dashboard cards
   const allActiveCourts = state.matches.filter(m => m.status === "In Progress" || (m.status === "Not Started" && isMatchPlayable(m, state.matches, state.teams)));
-  attachCardListeners(allActiveCourts);
+  attachCardListeners(allActiveCourts, "#view-courts");
 }
 
 /**
@@ -636,7 +636,7 @@ function renderCourtDashboardMatchHTML(match, badgeClass) {
   const timerHtml = renderStopwatchHTML(match.id, match.status);
 
   return `
-    <div class="court-active-match" id="match-card-${match.id}">
+    <div class="court-active-match" id="match-card-${match.id}" data-match-card-id="${match.id}">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <span style="font-size:0.8rem; font-weight:700; color:var(--text-secondary);">${match.timeSlot} (${match.stage})</span>
         ${timerHtml}
@@ -1092,7 +1092,7 @@ function renderMatchCardHTML(match) {
   const stopwatchHtml = renderStopwatchHTML(match.id, match.status);
 
   return `
-    <div class="match-card glass-panel ${cardClass}" id="match-card-${match.id}">
+    <div class="match-card glass-panel ${cardClass}" id="match-card-${match.id}" data-match-card-id="${match.id}">
       <div class="match-top">
         <div>
           <span style="font-weight: 700; color: var(--text-primary); margin-right: 4px;">${match.timeSlot}</span>
@@ -1250,17 +1250,22 @@ function renderStandingsTableHTML(title, standings, highlightCount, isSuperGroup
 /**
  * Attaches click event listeners to match cards inside list
  */
-function attachCardListeners(matchesList) {
+function attachCardListeners(matchesList, containerSelector = "") {
+  const parent = containerSelector ? document.querySelector(containerSelector) : document;
+  if (!parent) return;
+
   matchesList.forEach(m => {
-    const card = document.getElementById(`match-card-${m.id}`);
+    const card = parent.querySelector(`[data-match-card-id="${m.id}"]`);
     if (!card) return;
 
     // Save Button
     const saveBtn = card.querySelector(".btn-save");
     if (saveBtn) {
       saveBtn.addEventListener("click", () => {
-        const inputA = document.getElementById(`score-a-${m.id}`);
-        const inputB = document.getElementById(`score-b-${m.id}`);
+        const inputA = card.querySelector(`#score-a-${m.id}`);
+        const inputB = card.querySelector(`#score-b-${m.id}`);
+        
+        if (!inputA || !inputB) return;
         
         const scoreAVal = inputA.value.trim();
         const scoreBVal = inputB.value.trim();
@@ -1434,11 +1439,11 @@ function toggleStopwatch(matchId) {
   }
 
   // Redraw the control button without full layout refresh
-  const timerDiv = document.getElementById(`timer-display-${matchId}`);
-  if (timerDiv) {
+  const timerDivs = document.querySelectorAll(`#timer-display-${matchId}`);
+  timerDivs.forEach(timerDiv => {
     const playBtn = timerDiv.querySelector(".timer-start-pause");
     if (playBtn) playBtn.innerHTML = timer.isRunning ? '⏸️' : '▶️';
-  }
+  });
 }
 
 /**
@@ -1463,25 +1468,25 @@ function resetStopwatch(matchId) {
   
   updateStopwatchDigits(matchId);
   
-  const timerDiv = document.getElementById(`timer-display-${matchId}`);
-  if (timerDiv) {
+  const timerDivs = document.querySelectorAll(`#timer-display-${matchId}`);
+  timerDivs.forEach(timerDiv => {
     const playBtn = timerDiv.querySelector(".timer-start-pause");
     if (playBtn) playBtn.innerHTML = '▶️';
     timerDiv.classList.remove("finished");
-  }
+  });
 }
 
 function updateStopwatchDigits(matchId) {
   const timer = matchTimers[matchId];
   if (!timer) return;
 
-  const timerDiv = document.getElementById(`timer-display-${matchId}`);
-  if (timerDiv) {
+  const timerDivs = document.querySelectorAll(`#timer-display-${matchId}`);
+  const minutes = Math.floor(timer.remainingSeconds / 60);
+  const seconds = timer.remainingSeconds % 60;
+  const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  
+  timerDivs.forEach(timerDiv => {
     const digitsEl = timerDiv.querySelector(".timer-digits");
-    const minutes = Math.floor(timer.remainingSeconds / 60);
-    const seconds = timer.remainingSeconds % 60;
-    const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
     if (digitsEl) digitsEl.innerText = timeStr;
 
     if (timer.remainingSeconds === 0) {
@@ -1489,7 +1494,7 @@ function updateStopwatchDigits(matchId) {
     } else {
       timerDiv.classList.remove("finished");
     }
-  }
+  });
 }
 
 /**
