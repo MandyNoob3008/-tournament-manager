@@ -646,14 +646,14 @@ function renderCourtDashboardMatchHTML(match, badgeClass) {
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:0.9rem; font-weight:500;">${teamAName}</span>
           ${showInputs ? 
-            `<input type="number" class="match-score-input" style="height:32px; width:45px;" id="score-a-${match.id}" value="${scoreAVal}" min="0">` : 
+            `<input type="number" class="match-score-input" style="height:32px; width:45px;" id="score-a-${match.id}" value="${scoreAVal}" min="0" max="11" oninput="if(value > 11) value = 11; if(value < 0) value = 0;">` : 
             `<span style="font-size:1.1rem; font-weight:700;">${match.scoreA !== null ? match.scoreA : '-'}</span>`
           }
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:0.9rem; font-weight:500;">${teamBName}</span>
           ${showInputs ? 
-            `<input type="number" class="match-score-input" style="height:32px; width:45px;" id="score-b-${match.id}" value="${scoreBVal}" min="0">` : 
+            `<input type="number" class="match-score-input" style="height:32px; width:45px;" id="score-b-${match.id}" value="${scoreBVal}" min="0" max="11" oninput="if(value > 11) value = 11; if(value < 0) value = 0;">` : 
             `<span style="font-size:1.1rem; font-weight:700;">${match.scoreB !== null ? match.scoreB : '-'}</span>`
           }
         </div>
@@ -1113,7 +1113,7 @@ function renderMatchCardHTML(match) {
           </div>
           <div>
             ${showInputs ? 
-              `<input type="number" class="match-score-input" id="score-a-${match.id}" value="${scoreAVal}" min="0">` : 
+              `<input type="number" class="match-score-input" id="score-a-${match.id}" value="${scoreAVal}" min="0" max="11" oninput="if(value > 11) value = 11; if(value < 0) value = 0;">` : 
               `<span class="score-display-value ${winnerAClass}">${match.scoreA !== null ? match.scoreA : '-'}</span>`
             }
           </div>
@@ -1126,7 +1126,7 @@ function renderMatchCardHTML(match) {
           </div>
           <div>
             ${showInputs ? 
-              `<input type="number" class="match-score-input" id="score-b-${match.id}" value="${scoreBVal}" min="0">` : 
+              `<input type="number" class="match-score-input" id="score-b-${match.id}" value="${scoreBVal}" min="0" max="11" oninput="if(value > 11) value = 11; if(value < 0) value = 0;">` : 
               `<span class="score-display-value ${winnerBClass}">${match.scoreB !== null ? match.scoreB : '-'}</span>`
             }
           </div>
