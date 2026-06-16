@@ -83,3 +83,5 @@ export const DEFAULT_MATCHES = [
 
 export const STORAGE_KEY = "live_tournament_state";
 export const SYNC_STORAGE_KEY = "live_tournament_sync_id";
+export const ADMIN_PASSCODE = "gnr2026";
+

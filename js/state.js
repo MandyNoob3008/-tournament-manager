@@ -8,7 +8,8 @@ export let state = {
   undoStack: [],
   syncId: null,
   isSpectator: false,
-  isSyncing: false
+  isSyncing: false,
+  isAdmin: false
 };
 
 // Listeners to trigger UI updates
@@ -23,9 +24,23 @@ function notifyStateListeners() {
 }
 
 /**
+ * Route synchronization URL depending on environment to prevent CORS issues on production
+ */
+export function getSyncUrl(syncId) {
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "") {
+    return `https://keyvalue.xyz/v1/${syncId}`;
+  }
+  return `/api/sync?id=${syncId}`;
+}
+
+/**
  * Initialize state from localStorage or defaults, and check query string for syncId
  */
 export function initState() {
+  // Check session storage for admin login
+  const savedAdmin = sessionStorage.getItem("isAdmin");
+  state.isAdmin = savedAdmin === "true";
+
   // Check URL query parameters for spectator syncId
   const urlParams = new URLSearchParams(window.location.search);
   const syncParam = urlParams.get('syncId');
@@ -33,6 +48,7 @@ export function initState() {
   if (syncParam) {
     state.syncId = syncParam.trim();
     state.isSpectator = true;
+    state.isAdmin = false; // Spectators cannot be admin
     state.teams = {};
     state.matches = [];
     state.undoStack = [];
@@ -86,7 +102,7 @@ export async function saveState() {
 }
 
 /**
- * Push local state to keyvalue.xyz
+ * Push local state to keyvalue.xyz (via proxy if on vercel)
  */
 export async function pushToRemoteSync() {
   if (!state.syncId || state.isSpectator) return;
@@ -94,7 +110,7 @@ export async function pushToRemoteSync() {
   notifyStateListeners();
 
   try {
-    const res = await fetch(`https://keyvalue.xyz/v1/${state.syncId}`, {
+    const res = await fetch(getSyncUrl(state.syncId), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -120,7 +136,7 @@ export async function pullFromRemoteSync() {
   if (!state.syncId) return;
   
   try {
-    const res = await fetch(`https://keyvalue.xyz/v1/${state.syncId}`);
+    const res = await fetch(getSyncUrl(state.syncId));
     if (res.ok) {
       const data = await res.json();
       if (data && data.teams && data.matches) {

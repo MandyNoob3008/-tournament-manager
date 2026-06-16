@@ -672,10 +672,90 @@ function renderCourtDashboardMatchHTML(match, badgeClass) {
  * Render Admin tab elements (includes custom remote sync configurations & file export/import)
  */
 export function renderAdmin() {
-  const container = document.getElementById("admin-teams-accordion");
-  if (!container) return;
+  const adminPanel = document.getElementById("view-admin");
+  if (!adminPanel) return;
 
-  // 1. Render teams list accordion
+  if (!state.isAdmin) {
+    adminPanel.innerHTML = `
+      <div class="card glass-panel" style="max-width: 400px; margin: 40px auto; padding: 24px;">
+        <div class="card-title" style="justify-content:center; gap:8px; font-size:1.2rem; margin-bottom:16px;">
+          <span>🔒 Admin Access Required</span>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-secondary); text-align:center; margin-bottom:20px; line-height:1.5;">
+          This section is restricted to tournament organizers. Please enter the admin passcode to unlock editing and sync options.
+        </div>
+        <div class="form-group">
+          <label>Passcode PIN</label>
+          <input type="password" class="form-input" id="admin-pin-input" placeholder="••••" style="text-align:center; font-size:1.5rem; letter-spacing:0.3em; height:48px;" maxlength="10">
+        </div>
+        <button class="btn btn-primary" id="btn-login-admin" style="width:100%; height:42px; justify-content:center; font-size:0.85rem; margin-top:8px;">
+          🔓 Unlock Admin Panel
+        </button>
+      </div>
+    `;
+
+    const pinInput = document.getElementById("admin-pin-input");
+    if (pinInput) {
+      pinInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          window.app.loginAdmin(pinInput.value);
+        }
+      });
+    }
+
+    const loginBtn = document.getElementById("btn-login-admin");
+    if (loginBtn) {
+      loginBtn.addEventListener("click", () => {
+        const pinVal = document.getElementById("admin-pin-input")?.value || "";
+        window.app.loginAdmin(pinVal);
+      });
+    }
+    return;
+  }
+
+  adminPanel.innerHTML = `
+    <!-- Reset Options Card -->
+    <div class="card glass-panel">
+      <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Tournament Reset Controls</span>
+        <button class="btn btn-danger" onclick="app.logoutAdmin()" style="font-size: 0.65rem; padding: 4px 8px;">🔒 Lock Admin</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <button class="btn btn-danger" onclick="app.promptReset('all')">Reset Entire Tournament</button>
+          <button class="btn btn-danger" onclick="app.promptReset('scores')">Reset All Scores</button>
+        </div>
+        <div style="border-top: 1px solid var(--glass-border); padding-top: 12px; margin-top: 6px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">Reset Specific Stage / Group:</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button class="btn" onclick="app.promptReset('group-a')">Group A</button>
+            <button class="btn" onclick="app.promptReset('group-b')">Group B</button>
+            <button class="btn" onclick="app.promptReset('group-c')">Group C</button>
+            <button class="btn" onclick="app.promptReset('group-d')">Group D</button>
+            <button class="btn" onclick="app.promptReset('group-e')">Group E</button>
+            <button class="btn" onclick="app.promptReset('group-f')">Group F</button>
+            <button class="btn" onclick="app.promptReset('super-x')">Super X</button>
+            <button class="btn" onclick="app.promptReset('super-y')">Super Y</button>
+            <button class="btn" onclick="app.promptReset('finals')">Finals</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Teams Editor Accordion -->
+    <div class="card glass-panel">
+      <div class="card-title">Edit Team Details & Members</div>
+      <div id="admin-teams-accordion" style="margin-top: 10px;">
+        <!-- Rendered below -->
+      </div>
+    </div>
+
+    <div id="admin-extra-panels"></div>
+  `;
+
+  const accordionContainer = document.getElementById("admin-teams-accordion");
+  if (!accordionContainer) return;
+
   const teamKeys = Object.keys(state.teams);
   let html = "";
   teamKeys.forEach(key => {
@@ -707,9 +787,8 @@ export function renderAdmin() {
       </div>
     `;
   });
-  container.innerHTML = html;
+  accordionContainer.innerHTML = html;
 
-  // 2. Add Remote Sync Panel & Export/Import tools dynamically into Admin view
   setupAdminSyncAndBackupPanels();
 }
 
@@ -980,7 +1059,7 @@ function renderMatchCardHTML(match) {
   }
 
   const isEditing = match._isEditing === true || match.status === "Not Started" || match.status === "In Progress";
-  const showInputs = isEditing && isPlayable && !state.isSpectator;
+  const showInputs = isEditing && isPlayable && state.isAdmin;
 
   let scoreAVal = match.scoreA !== null ? match.scoreA : "";
   let scoreBVal = match.scoreB !== null ? match.scoreB : "";
@@ -1058,7 +1137,7 @@ function renderMatchCardHTML(match) {
         <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; font-style: italic;">
           🔒 Awaiting qualified teams to unlock.
         </div>
-      ` : !state.isSpectator ? `
+      ` : state.isAdmin ? `
         <div class="match-actions">
           ${showInputs ? `
             <button class="btn btn-primary btn-save" data-match-id="${match.id}">
@@ -1308,7 +1387,7 @@ function renderStopwatchHTML(matchId, status) {
   return `
     <div class="match-stopwatch ${isFinished ? 'finished' : ''}" id="timer-display-${matchId}">
       <span class="timer-digits">${timeStr}</span>
-      ${!state.isSpectator ? `
+      ${state.isAdmin ? `
         <button class="timer-btn timer-start-pause" title="Play/Pause">${timer.isRunning ? '⏸️' : '▶️'}</button>
         <button class="timer-btn timer-reset-control" title="Reset/Fast Forward">↩️</button>
       ` : ''}

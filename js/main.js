@@ -20,6 +20,7 @@ import {
   showConfirmModal 
 } from './ui.js';
 import { recalculateAll } from './calculations.js';
+import { ADMIN_PASSCODE } from './constants.js';
 
 // 1. STATE BINDINGS
 addStateListener(() => {
@@ -215,6 +216,25 @@ function undo() {
   }
 }
 
+// Admin Panel Login / Logout Operations
+function loginAdmin(pin) {
+  if (pin === ADMIN_PASSCODE) {
+    state.isAdmin = true;
+    sessionStorage.setItem("isAdmin", "true");
+    renderUI();
+    showToast("🔓 Admin panel unlocked successfully!");
+  } else {
+    showToast("❌ Incorrect admin passcode PIN!", true);
+  }
+}
+
+function logoutAdmin() {
+  state.isAdmin = false;
+  sessionStorage.removeItem("isAdmin");
+  renderUI();
+  showToast("🔒 Admin panel locked.");
+}
+
 // 3. TAB FILTERS setup
 function setupFilters() {
   // Stage Filter in Schedule View
@@ -250,7 +270,9 @@ window.app = {
   toggleAccordion,
   saveTeamDetails,
   promptReset,
-  undo
+  undo,
+  loginAdmin,
+  logoutAdmin
 };
 
 // 5. INITIALIZATION RUN
