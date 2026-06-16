@@ -1278,8 +1278,14 @@ function attachCardListeners(matchesList) {
           return;
         }
 
+        // Limit scores to a maximum of 11 points
+        if (scoreA > 11 || scoreB > 11) {
+          showToast("Scores cannot exceed 11 points!", true);
+          return;
+        }
+
         // Draw prevention in final match
-        if (match.stage === "Finals" && scoreA === scoreB) {
+        if (m.stage === "Finals" && scoreA === scoreB) {
           showToast("Draw is not allowed in Finals! Set a tiebreaker winner.", true);
           return;
         }
