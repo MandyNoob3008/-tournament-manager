@@ -8,6 +8,8 @@ import {
   popFromUndoStack, 
   addStateListener, 
   startSpectatorPolling,
+  stopSpectatorPolling,
+  pullFromRemoteSync,
   loadDefaults
 } from './state.js';
 import { 
@@ -220,7 +222,9 @@ function undo() {
 function loginAdmin(pin) {
   if (pin === ADMIN_PASSCODE) {
     state.isAdmin = true;
+    state.isSpectator = false;
     sessionStorage.setItem("isAdmin", "true");
+    stopSpectatorPolling(); // Stop spectator polling loop when logged in as admin to avoid overwriting edits
     renderUI();
     showToast("🔓 Admin panel unlocked successfully!");
   } else {
@@ -230,7 +234,9 @@ function loginAdmin(pin) {
 
 function logoutAdmin() {
   state.isAdmin = false;
+  state.isSpectator = true;
   sessionStorage.removeItem("isAdmin");
+  startSpectatorPolling(); // Start polling scores for updates again
   renderUI();
   showToast("🔒 Admin panel locked.");
 }
@@ -284,6 +290,9 @@ function init() {
   
   if (state.isSpectator) {
     startSpectatorPolling();
+  } else {
+    // If admin is logged in on init, pull from remote sync once to fetch the latest state
+    pullFromRemoteSync();
   }
   
   renderUI();

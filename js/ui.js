@@ -99,25 +99,9 @@ export function renderUI() {
  */
 function setupSpectatorBanner() {
   let spectatorBar = document.getElementById("spectator-banner");
-  
-  if (state.isSpectator) {
-    if (!spectatorBar) {
-      spectatorBar = document.createElement("div");
-      spectatorBar.id = "spectator-banner";
-      spectatorBar.className = "spectator-banner";
-      spectatorBar.innerHTML = `
-        <div class="spectator-banner-content">
-          <span class="live-blink">●</span> SPECTATOR MODE — Standings update automatically in real-time
-        </div>
-      `;
-      document.body.prepend(spectatorBar);
-      document.body.classList.add("has-spectator-banner");
-    }
-  } else {
-    if (spectatorBar) {
-      spectatorBar.remove();
-      document.body.classList.remove("has-spectator-banner");
-    }
+  if (spectatorBar) {
+    spectatorBar.remove();
+    document.body.classList.remove("has-spectator-banner");
   }
 }
 
@@ -630,7 +614,7 @@ function renderCourtDashboardMatchHTML(match, badgeClass) {
 
   // Check editing
   const isEditing = match._isEditing === true || match.status === "Not Started" || match.status === "In Progress";
-  const showInputs = isEditing && isPlayable && !state.isSpectator;
+  const showInputs = isEditing && isPlayable && state.isAdmin;
 
   // Set up timer HTML
   const timerHtml = renderStopwatchHTML(match.id, match.status);
@@ -806,38 +790,7 @@ function setupAdminSyncAndBackupPanels() {
     adminView.appendChild(extraPanels);
   }
 
-  // Generate Spectator shareable URL
-  const spectatorUrl = state.syncId ? `${window.location.origin}${window.location.pathname}?syncId=${state.syncId}` : '';
-
   extraPanels.innerHTML = `
-    <!-- Remote Sync Panel -->
-    <div class="card glass-panel" style="margin-top: 16px;">
-      <div class="card-title">🌐 Live Remote Syncing</div>
-      <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">
-        Enable live syncing to stream the standings to spectators in real-time. Share the unique read-only link below so players can check group standings from their courts!
-      </div>
-      
-      ${state.syncId ? `
-        <div class="form-group">
-          <label>Spectator Shareable Link</label>
-          <div style="display:flex; gap:8px; margin-top:6px;">
-            <input type="text" class="form-input" id="sync-shareable-url" value="${spectatorUrl}" readonly style="background:var(--bg-primary); cursor:pointer;">
-            <button class="btn btn-primary" id="btn-copy-sync-url">Copy Link</button>
-          </div>
-        </div>
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
-          <span style="font-size: 0.75rem; color: var(--accent-success); display:flex; align-items:center; gap:6px;">
-            <span class="sync-active-indicator"></span> Sync Session Active ${state.isSyncing ? '(Syncing...)' : ''}
-          </span>
-          <button class="btn btn-danger" id="btn-disable-sync" style="font-size: 0.7rem;">Stop Remote Sync</button>
-        </div>
-      ` : `
-        <div style="display:flex; justify-content:flex-end;">
-          <button class="btn btn-primary" id="btn-enable-sync" style="font-size:0.75rem;">⚡ Enable Live Remote Sync</button>
-        </div>
-      `}
-    </div>
-
     <!-- Backup Import/Export Panel -->
     <div class="card glass-panel" style="margin-top: 16px;">
       <div class="card-title">💾 Backup & Recovery</div>
@@ -851,45 +804,6 @@ function setupAdminSyncAndBackupPanels() {
       </div>
     </div>
   `;
-
-  // Attach button event listeners
-  const btnEnableSync = document.getElementById("btn-enable-sync");
-  if (btnEnableSync) {
-    btnEnableSync.addEventListener("click", async () => {
-      showToast("Activating sync session...");
-      const syncId = await enableRemoteSync();
-      showToast(`Sync activated! Share the link with players.`);
-      renderAdmin();
-    });
-  }
-
-  const btnDisableSync = document.getElementById("btn-disable-sync");
-  if (btnDisableSync) {
-    btnDisableSync.addEventListener("click", () => {
-      showConfirmModal(
-        "Disable Remote Sync?",
-        "Are you sure you want to stop syncing live tournament results? The shareable link will stop updating.",
-        () => {
-          disableRemoteSync();
-          showToast("Sync session disabled.");
-          renderAdmin();
-        }
-      );
-    });
-  }
-
-  const btnCopySync = document.getElementById("btn-copy-sync-url");
-  if (btnCopySync) {
-    btnCopySync.addEventListener("click", () => {
-      const copyInput = document.getElementById("sync-shareable-url");
-      if (copyInput) {
-        copyInput.select();
-        copyInput.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(copyInput.value);
-        showToast("Spectator link copied to clipboard!");
-      }
-    });
-  }
 
   const btnExport = document.getElementById("btn-export-backup");
   if (btnExport) {

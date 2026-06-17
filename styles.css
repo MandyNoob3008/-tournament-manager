@@ -1121,3 +1121,57 @@ body.has-spectator-banner header {
   }
 }
 
+/* ==========================================================================
+   MOBILE SCORES & STANDINGS COMPATIBILITY (OPTIMIZED FOR NARROW SCREENS)
+   ========================================================================== */
+
+/* Remove default spin buttons on number inputs for clean scoring input on mobile */
+.match-score-input::-webkit-outer-spin-button,
+.match-score-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.match-score-input {
+  -moz-appearance: textfield;
+}
+
+/* Touch momentum scrolling for overflow wrappers */
+.standings-table-wrapper,
+.bracket-flow-wrapper {
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 500px) {
+  /* Hide less critical columns to fit standings table on narrow screens */
+  .col-drawn,
+  .col-pf,
+  .col-pa {
+    display: none !important;
+  }
+
+  /* Optimize padding and sizes to fit team names and key stats */
+  .standings-table th,
+  .standings-table td {
+    padding: 6px 4px !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* Restrict team name column to prevent overflow pushing other columns out */
+  .col-team {
+    max-width: 110px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Make team players text smaller and cleaner */
+  .team-players-sub {
+    font-size: 0.65rem !important;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+
