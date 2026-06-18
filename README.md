@@ -1,4 +1,4 @@
-# Internal Lilly GNR PickleBall Tournament 2026
+# Internal GNR PickleBall Tournament 2026
 
 A live, mobile-first Tournament Score Management and Standings application built using **HTML5, Javascript (ES6+), and Vanilla CSS**. This application is designed specifically for phone screens so organizers can run the entire tournament from a court without using Excel sheets.
 
